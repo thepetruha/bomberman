@@ -11,10 +11,8 @@ const Wrapper = styled.div`
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 
 function GameMap({ size }: { size: number }) {
-    // Загружаем текстуру из изображения
     const baseTexture = PIXI.BaseTexture.from("src/assets/bomberman.png");
 
-    // Указываем координаты и размеры нужного куска
     const frame = new PIXI.Rectangle(48, 48, 16, 18); // x, y, width, height
     const texture = new PIXI.Texture(baseTexture, frame);
 
