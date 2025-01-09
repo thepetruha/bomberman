@@ -4,15 +4,32 @@
   "description": "It ts game from 80s",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "client": "nodemon front/main.ts",
+    "client": "vite --config ./front/vite.config.ts",
+    "client:build": "vite build --config ./front/vite.config.ts",
     "server": "nodemon back/main.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "dotenv": "^16.4.7",
     "nodemon": "^3.1.9",
-    "socket.io": "^4.8.1"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "socket.io": "^4.8.1",
+    "vite": "^6.0.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@types/react": "^19.0.4",
+    "@types/react-dom": "^19.0.2",
+    "babel-loader": "^9.2.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
   }
 }
