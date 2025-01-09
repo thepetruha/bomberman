@@ -1,0 +1,16 @@
+{
+  "name": "bomberman",
+  "version": "1.0.0",
+  "description": "It ts game from 80s",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "front": "nodemon front/main.ts",
+    "back": "nodemon "
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
