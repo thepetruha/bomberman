@@ -13,7 +13,6 @@ const Wrapper = styled.div`
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 type TileType = "empty" | "wall";
-type Player = { id: string; x: number; y: number };
 
 function generateMap(size: number): TileType[][] {
     const map: TileType[][] = [];
@@ -77,60 +76,19 @@ function GameMap({ size }: { size: number }) {
 }
 
 export default function GameCanvas({ size }: { size: number }) {
-    const { socket }: any = useConnector()
-    console.log('>>>>>>', socket)
+    const { socket, playerId, players, setPlayers } = useConnector()
+    console.log('[game_field]', socket)
 
     const baseTexture = PIXI.BaseTexture.from("src/assets/bomberman.png");
 
     const frame = new PIXI.Rectangle(0, 0, 15, 15); // Спрайт игрока
     const playerTexture = new PIXI.Texture(baseTexture, frame);
 
-    const tileSize = 64; // Размер клетки
-    const mapSize = 12; // Размер карты
-
-    const [players, setPlayers] = useState<Record<string, Player>>({});
-    const [playerId, setPlayerId] = useState<string | null>(null);
+    const tileSize = 64;
+    const mapSize = 12;
 
     useEffect(() => {
-        // Подключение к серверу
-        socket.on("connect", () => {
-            console.log("Connected to server");
-            setPlayerId(socket.id as any);
-        });
-
-        // Получение начальных данных
-        socket.on("init", ({ players: serverPlayers }: { players: Record<string, Player> }) => {
-            console.log("Init data received:", serverPlayers);
-            setPlayers(serverPlayers);
-        });
-
-        // Добавление нового игрока
-        socket.on("newPlayer", (player: Player) => {
-            console.log("New player joined:", player);
-            setPlayers((prev) => ({ ...prev, [player.id]: player }));
-        });
-
-        // Обновление позиции игрока
-        socket.on("playerMoved", (player: Player) => {
-            setPlayers((prev) => ({ ...prev, [player.id]: player }));
-        });
-
-        // Удаление игрока
-        socket.on("playerDisconnected", ({ id }: { id: string }) => {
-            setPlayers((prev) => {
-                const updatedPlayers = { ...prev };
-                delete updatedPlayers[id];
-                return updatedPlayers;
-            });
-        });
-
-        return () => {
-            socket.disconnect();
-        };
-    }, [socket]);
-
-    // Обработка нажатий клавиш
-    useEffect(() => {
+        if (!socket) return;
         const handleKeyDown = (event: KeyboardEvent) => {
             if (!playerId || !players[playerId]) return;
 
