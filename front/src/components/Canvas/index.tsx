@@ -34,6 +34,40 @@ function generateMap(size: number): TileType[][] {
     return map;
 }
 
+function isWallAt(
+    map: TileType[][],
+    x: number,
+    y: number,
+    tileSize: number,
+    playerWidth: number,
+    playerHeight: number,
+    scale: number
+): boolean {
+    const scaledWidth = playerWidth * scale;
+    const scaledHeight = playerHeight * scale;
+
+    // Углы персонажа относительно центра
+    const corners = [
+        { x: x - scaledWidth / 2, y: y - scaledHeight / 2 }, // Верхний левый угол
+        { x: x + scaledWidth / 2, y: y - scaledHeight / 2 }, // Верхний правый угол
+        { x: x - scaledWidth / 2, y: y + scaledHeight / 2 }, // Нижний левый угол
+        { x: x + scaledWidth / 2, y: y + scaledHeight / 2 }, // Нижний правый угол
+    ];
+
+    // Проверка всех углов
+    return corners.some(({ x: cornerX, y: cornerY }) => {
+        const tileX = Math.floor(cornerX / tileSize);
+        const tileY = Math.floor(cornerY / tileSize);
+
+        // Проверка выхода за пределы карты
+        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+            return true; // Считается столкновением со стеной
+        }
+
+        // Проверка, является ли тайл стеной
+        return map[tileY][tileX] === "wall";
+    });
+}
 function GameMap({ size }: { size: number }) {
     const baseTexture = PIXI.BaseTexture.from("src/assets/bomberman.png");
 
@@ -76,39 +110,142 @@ function GameMap({ size }: { size: number }) {
 }
 
 export default function GameCanvas({ size }: { size: number }) {
-    const { socket, playerId, players, setPlayers } = useConnector()
-    console.log('[game_field]', socket)
+    const { socket, playerId, players, setPlayers } = useConnector();
+    console.log('[game_field]', socket);
 
     const baseTexture = PIXI.BaseTexture.from("src/assets/bomberman.png");
 
-    const frame = new PIXI.Rectangle(0, 0, 15, 15); // Спрайт игрока
-    const playerTexture = new PIXI.Texture(baseTexture, frame);
+    // Разбиваем спрайт-лист на текстуры для анимации
+    const animations = {
+        up: [
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(40, 15, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(55, 15, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(65, 15, 11, 15)),
+        ],
+        down: [
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 16, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 16, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 16, 11, 15)),
+        ],
+        left: [
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 32, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 32, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 32, 11, 15)),
+        ],
+        right: [
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 48, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 48, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 48, 11, 15)),
+        ],
+    };
 
     const tileSize = 64;
     const mapSize = 12;
 
+    const [localPlayerAnimationFrame, setLocalPlayerAnimationFrame] = useState(0);
+    const [localPlayerDirection, setLocalPlayerDirection] = useState<"up" | "down" | "left" | "right">("down");
+
     useEffect(() => {
         if (!socket) return;
+
+        const map = generateMap(mapSize);
+        const pressedKeys: Record<string, boolean> = {};
+        const speed = 4; // Скорость перемещения
+        let lastSentPosition = { x: 0, y: 0 }; // Последняя отправленная на сервер позиция
+
         const handleKeyDown = (event: KeyboardEvent) => {
+            pressedKeys[event.key] = true;
+        };
+
+        const handleKeyUp = (event: KeyboardEvent) => {
+            pressedKeys[event.key] = false;
+        };
+
+        const movePlayer = () => {
             if (!playerId || !players[playerId]) return;
 
-            let { x, y } = players[playerId];
+            let { x, y, direction = "down", animationFrame = 0 } = players[playerId];
+            let moved = false;
 
-            if (event.key === "ArrowUp" || event.key === "w") y -= 1;
-            if (event.key === "ArrowDown" || event.key === "s") y += 1;
-            if (event.key === "ArrowLeft" || event.key === "a") x -= 1;
-            if (event.key === "ArrowRight" || event.key === "d") x += 1;
+            if (pressedKeys["ArrowUp"] || pressedKeys["w"]) {
+                direction = "up";
+                if (!isWallAt(map, x, y - speed, tileSize, 32, 45, 1)) {
+                    y -= speed;
+                    moved = true;
+                }
+            }
+            if (pressedKeys["ArrowDown"] || pressedKeys["s"]) {
+                direction = "down";
+                if (!isWallAt(map, x, y + speed, tileSize, 32, 45, 1)) {
+                    y += speed;
+                    moved = true;
+                }
+            }
+            if (pressedKeys["ArrowLeft"] || pressedKeys["a"]) {
+                direction = "left";
+                if (!isWallAt(map, x - speed, y, tileSize, 32, 45, 1)) {
+                    x -= speed;
+                    moved = true;
+                }
+            }
+            if (pressedKeys["ArrowRight"] || pressedKeys["d"]) {
+                direction = "right";
+                if (!isWallAt(map, x + speed, y, tileSize, 32, 45, 1)) {
+                    x += speed;
+                    moved = true;
+                }
+            }
 
-            if (generateMap(mapSize)[y]?.[x] === "empty") {
-                const updatedPlayer = { id: playerId, x, y };
+            if (moved) {
+                animationFrame = (animationFrame + 1) % animations.down.length;
+
+                const updatedPlayer = { id: playerId, x, y, direction, animationFrame };
+
+                // Обновляем локальное состояние сразу
                 setPlayers((prev) => ({ ...prev, [playerId]: updatedPlayer }));
-                socket.emit("move", updatedPlayer);
+
+                // Отправляем обновления на сервер
+                if (lastSentPosition.x !== x || lastSentPosition.y !== y) {
+                    lastSentPosition = { x, y };
+                    socket.emit("move", updatedPlayer);
+                }
             }
         };
 
+        const interval = setInterval(() => {
+            movePlayer();
+
+            // Переключение кадров анимации только для локального игрока
+            if (Object.values(pressedKeys).some(Boolean)) {
+                setLocalPlayerAnimationFrame((prev) => (prev + 1) % animations.down.length);
+            }
+        }, 100); // Меняем кадры каждые 100ms (~10 FPS)
+
         window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+        };
     }, [playerId, players, socket]);
+
+    // Обработка данных от сервера для синхронизации игроков
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on("playerMoved", (updatedPlayer) => {
+            setPlayers((prev) => ({
+                ...prev,
+                [updatedPlayer.id]: updatedPlayer,
+            }));
+        });
+
+        return () => {
+            socket.off("playerMoved");
+        };
+    }, [socket]);
 
     return (
         <Wrapper style={{ maxWidth: size, maxHeight: size }}>
@@ -117,11 +254,11 @@ export default function GameCanvas({ size }: { size: number }) {
                 {Object.values(players).map((player) => (
                     <Sprite
                         key={player.id}
-                        texture={playerTexture}
-                        x={player.x * tileSize + tileSize / 2}
-                        y={player.y * tileSize + tileSize / 2}
+                        texture={animations[player.direction][player.animationFrame]} // Синхронизированное состояние
+                        x={player.x} // Абсолютные пиксельные координаты
+                        y={player.y} // Абсолютные пиксельные координаты
                         anchor={0.5}
-                        scale={4}
+                        scale={3}
                     />
                 ))}
             </Stage>

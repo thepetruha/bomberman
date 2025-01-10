@@ -12,7 +12,13 @@ const WrapperLayout = styled.div`
     width: 100%;
 `;
 
-export type Player = { id: string; x: number; y: number };
+export type Player = {
+    id: string;          // Уникальный идентификатор игрока
+    x: number;           // Координата X игрока
+    y: number;           // Координата Y игрока
+    direction: "up" | "down" | "left" | "right"; // Направление движения игрока
+    animationFrame: number;                     // Текущий кадр анимации
+};
 
 export const SocketConnector = createContext<{
     socket: Socket;
