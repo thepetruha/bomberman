@@ -22,30 +22,6 @@ function getRandomPosition(mapSize: number) {
     return { x: 100, y: 100 };
 }
 
-// io.on("connection", (socket) => {
-//     console.log(`Player connected: ${socket.id}`);
-
-//     const position = getRandomPosition(12);
-//     players[socket.id] = { id: socket.id, ...position };
-
-//     socket.emit("init", { players });
-//     socket.broadcast.emit("newPlayer", players[socket.id]);
-
-//     socket.on("move", (data: any) => {
-//         if (players[socket.id]) {
-//             players[socket.id].x = data.x;
-//             players[socket.id].y = data.y;
-//             io.emit("playerMoved", players[socket.id]);
-//         }
-//     });
-
-//     socket.on("disconnect", () => {
-//         console.log(`Player disconnected: ${socket.id}`);
-//         delete players[socket.id];
-//         io.emit("playerDisconnected", { id: socket.id });
-//     });
-// });
-
 io.on("connection", (socket) => {
     console.log(`Player connected: ${socket.id}`);
 
@@ -68,7 +44,7 @@ io.on("connection", (socket) => {
             const { x, y, direction, animationFrame } = data;
 
             // Проверка границ карты
-            const mapBounds = { width: 800, height: 600 }; // Пределы карты
+            const mapBounds = { width: 800, height: 800 }; // Пределы карты
             if (x >= 0 && x <= mapBounds.width && y >= 0 && y <= mapBounds.height) {
                 players[socket.id] = {
                     ...players[socket.id],

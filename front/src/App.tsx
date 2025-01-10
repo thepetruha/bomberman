@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import GameCanvas from './components/Canvas';
-import { ConnectorProvider } from './components/Connector';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { ConnectorProvider } from './components/Connector/provider';
 
 const GAME_FIELD_SIZE = 768; 
 
