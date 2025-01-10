@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
@@ -17,13 +17,45 @@ export const SocketConnector = createContext({
 });
 
 export const ConnectorProvider = ({ size, children, socket }: { size: number, children: React.ReactNode, socket: Socket }) => {
-    // if (!socket.connected) {
-    //     return (
-    //         <WrapperLayout style={{ maxWidth: size, height: size }}>
-    //             Loading...
-    //         </WrapperLayout>
-    //     )
-    // }
+    const [connected, setConnected] = useState(false);
+    const [error, setError] = useState<null | string>(null);
+
+    useEffect(() => {
+        socket.connect();
+    
+        socket.on("connect", () => {
+            setTimeout(() => {
+                console.log("Connected:", socket.id);
+                setConnected(true);
+            }, 500);
+        });
+    
+        socket.on("connect_error", (error) => {
+            console.error("Connection error:", error);
+            setError(error.message);
+        });
+    
+        return () => {
+            socket.disconnect();
+            setConnected(false);
+        };
+    }, []);
+
+    if (typeof error === 'string') {
+        return (
+            <WrapperLayout style={{ maxWidth: size, height: size }}>
+                {error}
+            </WrapperLayout>
+        )
+    }
+
+    if (!connected) {
+        return (
+            <WrapperLayout style={{ maxWidth: size, height: size }}>
+                Loading...
+            </WrapperLayout>
+        )
+    }
 
     return (
         <SocketConnector.Provider value={{ socket }}>

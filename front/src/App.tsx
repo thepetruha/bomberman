@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import GameCanvas from './components/Canvas';
 import { ConnectorProvider } from './components/Connector';
 import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 const GAME_FIELD_SIZE = 768; 
 
@@ -25,7 +25,9 @@ const Wrapper = styled.div`
 `
 
 const SOCKET_HOST = "http://localhost:4343";
-const socket: Socket = io(SOCKET_HOST, { autoConnect: true });
+export const socket = io(SOCKET_HOST, {
+  autoConnect: false
+});
 
 const App = () => {
   const [mounted, setMounted] = useState(false);
