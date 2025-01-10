@@ -1,6 +1,7 @@
 import { Stage, Container, Sprite, Text } from '@pixi/react';
 import styled from 'styled-components';
 import GameCanvas from './components/Canvas';
+import { ConnectorProvider } from './components/Connector';
 
 const GAME_FIELD_SIZE = 768; 
 
@@ -29,7 +30,9 @@ const App = () => {
         <h1>Bomberman</h1>
         <p>Bomberman is a video game franchise created by Shinichi Nakamoto and Shigeki Fujiwara, originally developed by Hudson Soft and currently owned by Konami.</p>
       </div>
-      <GameCanvas size={GAME_FIELD_SIZE} /> 
+      <ConnectorProvider size={GAME_FIELD_SIZE}>
+        <GameCanvas size={GAME_FIELD_SIZE} />
+      </ConnectorProvider> 
     </Wrapper>
   );
 };
