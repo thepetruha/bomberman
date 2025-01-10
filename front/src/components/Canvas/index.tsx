@@ -2,7 +2,6 @@ import { Stage, Sprite } from '@pixi/react';
 import styled from 'styled-components';
 import * as PIXI from "pixi.js";
 import { useMemo, useState, useEffect } from 'react';
-import { io } from "socket.io-client";
 import { useConnector } from '../Connector';
 
 const Wrapper = styled.div`
@@ -78,7 +77,8 @@ function GameMap({ size }: { size: number }) {
 }
 
 export default function GameCanvas({ size }: { size: number }) {
-    const { socket } = useConnector()
+    const { socket }: any = useConnector()
+    console.log('>>>>>>', socket)
 
     const baseTexture = PIXI.BaseTexture.from("src/assets/bomberman.png");
 
@@ -92,7 +92,6 @@ export default function GameCanvas({ size }: { size: number }) {
     const [playerId, setPlayerId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!socket) return;
         // Подключение к серверу
         socket.on("connect", () => {
             console.log("Connected to server");
@@ -128,7 +127,7 @@ export default function GameCanvas({ size }: { size: number }) {
         return () => {
             socket.disconnect();
         };
-    }, []);
+    }, [socket]);
 
     // Обработка нажатий клавиш
     useEffect(() => {

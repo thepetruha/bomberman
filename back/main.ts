@@ -24,11 +24,11 @@ function getRandomPosition(mapSize: number) {
 
 io.on("connection", (socket) => {
     console.log(`Player connected: ${socket.id}`);
+
     const position = getRandomPosition(12);
     players[socket.id] = { id: socket.id, ...position };
 
     socket.emit("init", { players });
-
     socket.broadcast.emit("newPlayer", players[socket.id]);
 
     socket.on("move", (data: any) => {

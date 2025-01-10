@@ -1,6 +1,5 @@
 import { createContext, useContext, useLayoutEffect, useMemo, useState } from "react";
-import { DefaultEventsMap, Socket } from "socket.io";
-import { io } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
 const WrapperLayout = styled.div`
@@ -13,22 +12,18 @@ const WrapperLayout = styled.div`
     width: 100%;
 `;
 
-const SOCKET_HOST = "http://localhost:4343";
-
 export const SocketConnector = createContext({
-    socket: {} as Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
+    socket: {},
 });
 
-export const ConnectorProvider = ({ size, children }: { size: number, children: React.ReactNode }) => {
-    const socket = useMemo(() => io(SOCKET_HOST), []);
-
-    if (!socket.connected) {
-        return (
-            <WrapperLayout style={{ maxWidth: size, height: size }}>
-                Loading...
-            </WrapperLayout>
-        )
-    }
+export const ConnectorProvider = ({ size, children, socket }: { size: number, children: React.ReactNode, socket: Socket }) => {
+    // if (!socket.connected) {
+    //     return (
+    //         <WrapperLayout style={{ maxWidth: size, height: size }}>
+    //             Loading...
+    //         </WrapperLayout>
+    //     )
+    // }
 
     return (
         <SocketConnector.Provider value={{ socket }}>

@@ -1,7 +1,8 @@
-import { Stage, Container, Sprite, Text } from '@pixi/react';
 import styled from 'styled-components';
 import GameCanvas from './components/Canvas';
 import { ConnectorProvider } from './components/Connector';
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
 const GAME_FIELD_SIZE = 768; 
 
@@ -23,14 +24,29 @@ const Wrapper = styled.div`
   }
 `
 
+const SOCKET_HOST = "http://localhost:4343";
+const socket: Socket = io(SOCKET_HOST, { autoConnect: true });
+
 const App = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setMounted(true);
+    }
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <Wrapper>
       <div className={"header"}>
         <h1>Bomberman</h1>
         <p>Bomberman is a video game franchise created by Shinichi Nakamoto and Shigeki Fujiwara, originally developed by Hudson Soft and currently owned by Konami.</p>
       </div>
-      <ConnectorProvider size={GAME_FIELD_SIZE}>
+      <ConnectorProvider size={GAME_FIELD_SIZE} socket={socket}>
         <GameCanvas size={GAME_FIELD_SIZE} />
       </ConnectorProvider> 
     </Wrapper>
