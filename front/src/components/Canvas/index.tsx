@@ -118,24 +118,24 @@ export default function GameCanvas({ size }: { size: number }) {
     // Разбиваем спрайт-лист на текстуры для анимации
     const animations = {
         up: [
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(40, 15, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(55, 15, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(65, 15, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(50, 15, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(66, 15, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(82, 15, 12, 16)),
         ],
         down: [
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 16, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 16, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 16, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(50, 0, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(66, 0, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(82, 0, 12, 16)),
         ],
         left: [
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 32, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 32, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 32, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 0, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(16, 0, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(34, 0, 12, 16)),
         ],
         right: [
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 48, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(14, 48, 11, 15)),
-            new PIXI.Texture(baseTexture, new PIXI.Rectangle(26, 48, 11, 15)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(2, 15, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(20, 15, 12, 16)),
+            new PIXI.Texture(baseTexture, new PIXI.Rectangle(34, 15, 12, 16)),
         ],
     };
 
@@ -150,7 +150,7 @@ export default function GameCanvas({ size }: { size: number }) {
 
         const map = generateMap(mapSize);
         const pressedKeys: Record<string, boolean> = {};
-        const speed = 4; // Скорость перемещения
+        const speed = 14; // Скорость перемещения
         let lastSentPosition = { x: 0, y: 0 }; // Последняя отправленная на сервер позиция
 
         const handleKeyDown = (event: KeyboardEvent) => {
